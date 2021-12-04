@@ -1,0 +1,151 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+// Nhan vao char userinput 4096
+// Kiem tra user4096, tach ra username và pass word luu vao hai bien tam 
+// lay tung dong cua file, luu vao mot mang tam, tach user name va pass cua dong do ra, so sanh voi user name va password
+
+
+void CheckAccount(char*& UserInput) // ham chinh
+{
+    char* username = new char[30];
+    char* password = new char[30];
+    string FileName = "AccountList.txt";
+
+    FindUserNameAndPassword(UserInput, username, password);
+    CompareAccount( username,  password, FileName); 
+
+}     
+
+void FindUserNameAndPassword(char* UserInput, char*& username, char*& password) // tach pass va username duoc nhap ra luu vao 2 char
+{
+
+    for (int i = 0; i < 4096; i++)
+    {
+        if (UserInput[i] == ' ')
+        {
+            int k = i + 1;
+            for (int j = 0; j < 30; j++)
+            {
+                password[j] = UserInput[k];
+                k = k + 1;
+                if (UserInput[k] == ' ')
+                {
+                    goto stop;
+                }
+            }
+        }
+        username[i] = UserInput[i];
+    }
+stop:;
+}  
+
+int CheckCorrect(string list, char* username, char* password, int& count) //ham tim kiem user tren chuoi doc tu file
+{                                                                         // kiem tra tai khoan co dung khong
+    char user[30];
+    char pass[30];
+
+    for (int i = 0; i < 255; i++)
+    {
+        if (list[i] == ' ')
+        {
+            int k = i + 1;
+            for (int j = 0; j < 30; j++)
+            {
+                pass[j] = list[k];
+                k = k + 1;
+                if (list[k] == ' ')
+                {
+                    goto stop;
+                }
+            }
+        }
+        user[i] = list[i];
+    }
+stop:;
+
+    //phan so sanh hai char (so sanh user voi username, pass voi password)
+
+    int n = strlen(user);
+    int m = strlen(pass);
+    
+    if (n != strlen(username)) //kiem tra do dai
+    {
+        return 0; // khong dung username
+    }
+    for (int i=0; i< n; i++) //kiem tra user
+    {
+        if (user[i] != username[i])
+        {
+            return 0; //khong dung 
+        }
+    }
+    if (m != strlen(password))
+    {
+        return 1; //khong dung password
+    }
+    for (int i = 0; i < m; i++ )//kiem tra pass
+    {
+        if (pass[i] != password[i])
+        {
+            return 1; //khong dung pass word
+        }
+    }
+    return 2;
+}
+
+void CompareAccount( char* username, char* password,string FileName) //doc file va luu vao char, 
+{                                                                    // goi ham kiem tra va so sanh 
+    fstream file;
+    file.open(FileName, ios::in);
+    if (file.fail())
+    {
+        cout << "Failed to open this file!" << endl;
+    }
+
+    int i = 0, int h = 0, count = 0;    //count de dem, neu duyet xong ma khong trung username nao thi bao chua tao account
+    string list;
+    while (!file.eof())
+    {
+        h = 0;
+        list = " ";
+        getline(file,list ); //doc tung dong cua file vao, tren moi dong la username va account
+        h = CheckCorrect( list, username, password,count ); // so sanh user pass cua 1 dong do thoi
+        if (h == 2)
+        {
+            goto stop1;
+        }
+    }
+
+    if (count == 0)
+    {
+        cout << "Tai khoan khong ton tai"<<endl;
+        goto stop;
+    }
+    else
+    {
+        if (h == 1)
+        {
+            cout << "Nhap sai password";
+        }
+    stop1:;
+        if (h == 2)
+        {
+            cout << "Tai khoan chinh xac";
+        }
+    }
+
+stop:;
+    file.close();
+}
+
+int main()
+{
+	char* UserInput = new char[4096];
+
+	CheckAccount(UserInput); 
+
+	return 0;
+}
